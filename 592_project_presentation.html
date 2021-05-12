@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>592 Project Report</title>
+<meta name="author" content="(Philipp Beer)"/>
+<meta name="description" content="project report presentation of time series clustering"/>
+<meta name="keywords" content="unic, 501dl, stassopoulou"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/theme/blood.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://cdn.jsdelivr.net/npm/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<style>
+.reveal table {
+    font-size: 0.6em;
+}
+
+.reveal p {
+    font-size: 0.8em;
+}
+</style>
+
+
+<section>
+<section id="slide-orge893d70">
+<h2 id="orge893d70">Clustering M4 Daily Data for Forecasting</h2>
+
+<div id="org02bb1a8" class="figure">
+<p><img src="https://552dlimages.s3-eu-west-1.amazonaws.com/unic_logo.png" alt="unic_logo.png" width="200px" />
+</p>
+</div>
+
+<p>
+Philipp Beer<br />
+Gradudate Program Data Science, UNIC
+</p>
+
+<p>
+COMP-501DL Research<br />
+Prof. Spyros Makridakis &amp; Prof. Ioannis Katakis<br />
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org72d1ca7">
+<h3 id="org72d1ca7">Project Goal</h3>
+<p>
+verify whether clustering time series can help improve the forecasting accuracy of machine learning methods and whether it can help get a better estimate of the error using cross-validation
+</p>
+</section>
+<section id="slide-org3d52c49">
+<h4 id="org3d52c49">Data Set - M4 competition</h4>
+<ul>
+<li>M4 data set are  100,000 time series</li>
+<li>split into hourly, daily, weekly, monthly, quarterly, and yearly series</li>
+<li>from diverse range of domains</li>
+<li>competition asks for forecast for each series</li>
+
+</ul>
+
+</section>
+<section id="slide-orgff21437">
+<h4 id="orgff21437">Machine Learning in time series forecasting</h4>
+<ul>
+<li>regularly outperformed by M4 competition benchmark</li>
+<li>high computational costs</li>
+<li>few data points for time series</li>
+
+</ul>
+</section>
+<section id="slide-orga3f97fd">
+<h4 id="orga3f97fd">Principal Idea: group similar time series</h4>
+<ul>
+<li>group time series with similar properties</li>
+<li>each group provides more data points to learn from</li>
+
+</ul>
+</section>
+<section id="slide-org27add80">
+<h4 id="org27add80">Hypothesis</h4>
+<ul>
+<li>similar series are simpler to learn by ML algorithms</li>
+<li>improved accuracy of the algorithm</li>
+
+</ul>
+</section>
+<section id="slide-org5c1bb17">
+<h4 id="org5c1bb17">Question: Can this approach help improve forecasting performance?</h4>
+
+</section>
+</section>
+<section>
+<section id="slide-org8783668">
+<h3 id="org8783668">Time Series Representation</h3>
+<div class="outline-text-3" id="text-org8783668">
+</div>
+</section>
+<section id="slide-orge1ca972">
+<h4 id="orge1ca972">Feature Representation</h4>
+<ul>
+<li>shape-, <b>feature-</b>, model-based</li>
+
+</ul>
+</section>
+<section id="slide-orgd152d5c">
+<h4 id="orgd152d5c">Approach in this project: features</h4>
+<ul>
+<li>extract features via a software package</li>
+<li>tsfresh - extracts around 800 features</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgcf8118f">
+<h3 id="orgcf8118f">Clustering</h3>
+<ul>
+<li>unsupervised learning technique</li>
+<li>learn from data without or minimal input</li>
+
+</ul>
+</section>
+<section id="slide-orgebec02b">
+<h4 id="orgebec02b">K-Means</h4>
+<ul>
+<li>grouping unlabeled data into predetermined number of groups</li>
+<li>random starting point of points</li>
+<li>iterative adjustment</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org9dda342">
+<h3 id="org9dda342">Deciding k</h3>
+<div class="outline-text-3" id="text-org9dda342">
+</div>
+</section>
+<section id="slide-orgb0910bd">
+<h4 id="orgb0910bd">Inertia</h4>
+<p>
+goal: minimize within cluster sum-of-squares
+  \[ \sum_{i=0}^n \min_{\mu_j \in C}(\lvert \lvert x_i - \mu_j \rvert \rvert^2) \]
+</p>
+
+<div id="org2550379" class="figure">
+<p><img src="./img/daily_kmeans_series_inertia.png" alt="daily_kmeans_series_inertia.png" width="450px" />
+</p>
+</div>
+</section>
+<section id="slide-org3e4fbc7">
+<h4 id="org3e4fbc7">Silhouette score</h4>
+<p>
+\[ s(i) = \frac{b(i) - a(i)}{{\max\{a(i),b(i)\}}} \]
+</p>
+
+<div id="org83b2125" class="figure">
+<p><img src="./img/daily_kmeans_sil_score_series.png" alt="daily_kmeans_sil_score_series.png" width="450px" />
+</p>
+</div>
+</section>
+<section id="slide-org2dfd07a">
+<h4 id="org2dfd07a">Silhouette Diagrams</h4>
+
+<div id="orga8509df" class="figure">
+<p><img src="./img/daily_kmeans_sil_dia_series.png" alt="daily_kmeans_sil_dia_series.png" width="450px" />
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org346c057">
+<h3 id="org346c057">Forecasting</h3>
+<div class="outline-text-3" id="text-org346c057">
+</div>
+</section>
+<section id="slide-orgf106b5d">
+<h4 id="orgf106b5d">Neural Network</h4>
+<ul>
+<li>3 hidden layers</li>
+<li>features - lags 1 - 7</li>
+<li>loss: MSE
+\[ MSE = \frac{1}{n} \sum_{i=1}^n (Y_i - \hat{Y}_i)^2 \]</li>
+
+</ul>
+</section>
+<section id="slide-org958483c">
+<h4 id="org958483c">Approach</h4>
+<ul>
+<li>full dataset</li>
+<li>clustered datasets</li>
+<li>equivalent random datasets</li>
+
+</ul>
+</section>
+<section id="slide-org407b3d6">
+<h4 id="org407b3d6">Cross-Validation</h4>
+<ul>
+<li>increase certainty about the error that is encountered in the training</li>
+<li>limit effects of peculiarities in the data on error metrics</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgd6559df">
+<h3 id="orgd6559df">Benchmarking</h3>
+<div class="outline-text-3" id="text-orgd6559df">
+</div>
+</section>
+<section id="slide-org4383688">
+<h4 id="org4383688">M4 Accuracy Metrics</h4>
+<p>
+\[ SMAPE = \frac{100}{n} \sum_{t=1}^{n} \frac{F_t - Y_t}{(\lvert F_t \rvert + \lvert Y_t \rvert)/2} \]
+\[ MASE = mean \left( \frac{\lvert e_j \rvert}{\frac{1}{T-1} \sum_{t=2}^{T} \lvert Y_t - Y_{t-1} \rvert} \right) \]
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org7429ffd">
+<h3 id="org7429ffd">Challenges</h3>
+<div class="outline-text-3" id="text-org7429ffd">
+</div>
+</section>
+<section id="slide-org4640a98">
+<h4 id="org4640a98">Data Preprocessing</h4>
+<ul>
+<li>data format - wide vs. long format</li>
+<li>Min-Max feature scaling with cross validation with neural networks</li>
+<li>information leakage</li>
+
+</ul>
+</section>
+<section id="slide-orgc71b497">
+<h4 id="orgc71b497">Feature extraction and selection</h4>
+<ul>
+<li>tsfresh - 800 metrics</li>
+<li>comprehensive vs. efficient</li>
+
+</ul>
+</section>
+<section id="slide-orgf1c50b8">
+<h4 id="orgf1c50b8">Computational Costs</h4>
+<ul>
+<li>6 vCPU / 32GB RAM</li>
+<li>feature extraction and selection (reason for daily only)</li>
+<li>neural network with cv</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd940ed8">
+<h3 id="orgd940ed8">Results</h3>
+<div class="outline-text-3" id="text-orgd940ed8">
+</div>
+</section>
+<section id="slide-orgb28e5da">
+<h4 id="orgb28e5da">Cross validation</h4>
+
+<div id="org3985af8" class="figure">
+<p><img src="../img/daily_cv_results.png" alt="daily_cv_results.png" />
+</p>
+</div>
+</section>
+<section id="slide-orgf9fe0fb">
+<h4 id="orgf9fe0fb">M4 results</h4>
+
+<div id="org1dfcc1e" class="figure">
+<p><img src="../img/daily_m4_results.png" alt="daily_m4_results.png" />
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org9c1ad69">
+<h3 id="org9c1ad69">Conclusion</h3>
+<ul>
+<li>clustering results not better than random</li>
+
+</ul>
+</section>
+<section id="slide-orgd5e62d6">
+<h4 id="orgd5e62d6">features vs lags for NN</h4>
+<ul>
+<li>possibly better results</li>
+<li>increase of neural network size</li>
+<li>how meaningful are efficient features</li>
+
+</ul>
+</section>
+<section id="slide-org655e39f">
+<h4 id="org655e39f">Approach to cross validation</h4>
+<ul>
+<li>less folds</li>
+<li>MinMax scaler</li>
+
+</ul>
+</section>
+<section id="slide-org1f6a924">
+<h4 id="org1f6a924">Uncertainty in the clustering</h4>
+<ul>
+<li>reduced uncertainty in the data clustered data</li>
+<li>indication in MASE (higher in test results compared to cv)</li>
+
+</ul>
+</section>
+<section id="slide-org7c17bfd">
+<h4 id="org7c17bfd">Complexity of problem definition</h4>
+<ul>
+<li>many moving parts</li>
+<li><a href="https://github.com/philippbeer/m4_clustering">M4 Clustering on Github</a></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org409de56">
+<h3 id="org409de56">Outlook</h3>
+<div class="outline-text-3" id="text-org409de56">
+</div>
+<ul class="org-ul">
+<li><a id="orgf02f20e"></a>Algorithm<br />
+<ul>
+<li>hierarchical and density and grid-based methods</li>
+
+</ul>
+</li>
+<li><a id="orgdff5725"></a>Feature Choice<br />
+<ul>
+<li>ranking of features</li>
+
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org68230ce">
+<h3 id="org68230ce">Thank you for your attention</h3>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>
